@@ -255,10 +255,7 @@ class Help(commands.Cog):
             if command:
                 await self.show_specific_command_help(ctx, command)
         else:
-            skip_cogs = [
-                "developer",
-                "error_handler",
-            ]
+            skip_cogs = []
 
             commands = [
                 cmd
