@@ -2,6 +2,7 @@ import aiohttp
 import discord
 
 import constants
+import contextlib
 from utils.formatting import iso_to_discord_timestamp
 
 
@@ -9,12 +10,19 @@ class CommitSelectMenu(discord.ui.Select):
     def __init__(self, commits, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.commits = commits
+        self.last_message = None
 
     async def get_commit(self, url: str):
         async with (aiohttp.ClientSession() as session, session.get(url) as resp):
             return "Invalid commit." if resp.status != 200 else await resp.json()
 
     async def callback(self, interaction: discord.Interaction):
+        # Delete the previous message if it exists
+
+        if self.last_message:
+            with contextlib.suppress(discord.NotFound):
+                await self.last_message.delete_original_response()
+
         if selected_commit := next(
             (
                 commit
@@ -62,6 +70,6 @@ class CommitSelectMenu(discord.ui.Select):
                 discord.ui.Button(label="View diff", url=selected_commit["html_url"])
             )
 
-            await interaction.response.send_message(
+            self.last_message = await interaction.response.send_message(
                 embed=embed, view=view, ephemeral=True
             )
