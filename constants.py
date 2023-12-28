@@ -1,8 +1,14 @@
-bot_statuses = [
+# Bot constants
+BOT_STATUSES = [
     "Loop-de-loop",
 ]
+BOT_REPO = "notjawad/lambda"
+BOT_DESCRIPTION = (
+    "Lambda is a Discord bot designed specifically for programming communities."
+)
 
-file_emoji_dict = {
+
+FILE_EMOJIS = {
     # Folders and general files
     "dir": "📁",
     "file": "📄",
@@ -55,7 +61,7 @@ file_emoji_dict = {
     ".env": "🔒",
 }
 
-colors = {
+COLORS = {
     "green": 0x77DD77,
     "red": 0xFF6961,
     "yellow": 0xFDFD96,
@@ -69,4 +75,4 @@ colors = {
 }
 
 
-emojis = {"check": "✅", "cross": "❌", "pr": "<:lambda_propen:1189742699968991252>"}
+EMOJIS = {"check": "✅", "cross": "❌", "pr": "<:lambda_propen:1189742699968991252>"}
