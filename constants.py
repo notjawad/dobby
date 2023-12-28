@@ -75,4 +75,9 @@ COLORS = {
 }
 
 
-EMOJIS = {"check": "✅", "cross": "❌", "pr": "<:lambda_propen:1189742699968991252>"}
+EMOJIS = {
+    "check": "<:checkmark:1189457685171687538>",
+    "cross": "<:letterx:1189490617961697380>",
+    "pr": "<:lambda_propen:1189742699968991252>",
+    "github": "<:github:1189774714592313475>",
+}
