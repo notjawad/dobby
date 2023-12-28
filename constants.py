@@ -2,9 +2,9 @@
 BOT_STATUSES = [
     "Loop-de-loop",
 ]
-BOT_REPO = "notjawad/lambda"
+BOT_REPO = "notjawad/dobby"
 BOT_DESCRIPTION = (
-    "Lambda is a Discord bot designed specifically for programming communities."
+    "Dobby is a Discord bot designed specifically for programming communities."
 )
 
 
@@ -13,13 +13,13 @@ FILE_EMOJIS = {
     "dir": "📁",
     "file": "📄",
     # Code and markup languages
-    ".py": "🐍",  # Python files
-    ".js": "🟨",  # JavaScript files
-    ".html": "🌐",  # HTML files
-    ".css": "🎨",  # CSS files
-    ".md": "📝",  # Markdown files
-    ".json": "🔣",  # JSON files
-    ".xml": "🔖",  # XML files
+    ".py": "🐍",
+    ".js": "🟨",
+    ".html": "🌐",
+    ".css": "🎨",
+    ".md": "📝",
+    ".json": "🔣",
+    ".xml": "🔖",
     # Images
     ".jpg": "🖼️",
     ".jpeg": "🖼️",
@@ -81,4 +81,35 @@ EMOJIS = {
     "pr": "<:lambda_propen:1189742699968991252>",
     "github": "<:github:1189774714592313475>",
     "repo": "📁",
+}
+
+LANG_EMOJIS = {
+    "python": "🐍",
+    "py": "🐍",
+    "java": "☕",
+    "javascript": "🟨",
+    "js": "🟨",
+    "cs": "🔧",
+    "php": "🐘",
+    "cpp": "🔧",
+    "typescript": "🟦",
+    "c": "🔧",
+    "ruby": "💎",
+    "objective-c": "📱",
+    "kotlin": "👾",
+    "scala": "🚀",
+    "go": "🐹",
+    "r": "📊",
+    "dart": "🎯",
+    "lua": "🌙",
+    "perl": "🐫",
+    "matlab": "🔢",
+    "visual basic": "🖥️",
+    "rust": "🦀",
+    "assembly": "🔩",
+    "pascal": "🧮",
+    "haskell": "🧪",
+    "elixir": "🔮",
+    "bash": "🐚",
+    "powershell": "🔋",
 }
