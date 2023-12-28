@@ -31,7 +31,8 @@ class Info(commands.Cog):
     )
     async def about(self, ctx: discord.ApplicationContext):
         async with aiohttp.ClientSession() as session:
-            commit = await self.github_api.fetch_latest_commits(constants.BOT_REPO)[0]
+            commit = await self.github_api.fetch_latest_commits(constants.BOT_REPO)
+            commit = commit[0]
 
         uptime = str(
             datetime.datetime.now(datetime.timezone.utc) - self.start_time
