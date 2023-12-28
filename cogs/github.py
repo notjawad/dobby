@@ -2,15 +2,15 @@ import discord
 import logging
 
 from discord.ext import commands
-from utils import embeds
-from utils.github_api import GitHubAPI
-from utils.ui import CommitSelectMenu
+from utils import _embeds
+from utils._github import GitHubAPI
+from utils._ui import CommitSelectMenu
 
 
 class Github(commands.Cog):
     def __init__(self, bot_: discord.Bot):
         self.bot = bot_
-        self.logger = logging.getLogger("lambda")
+        self.logger = logging.getLogger("dobby")
         self.github_api = GitHubAPI()
 
     _git = discord.commands.SlashCommandGroup(
@@ -47,7 +47,7 @@ class Github(commands.Cog):
 
         comments = await self.github_api.fetch_pr_comments(repo, pr_number)
 
-        embed = embeds.construct_pr_embed(pr, show_comments, comments[:3])
+        embed = _embeds.construct_pr_embed(pr, show_comments, comments[:3])
 
         open_in_github = discord.ui.Button(
             label="Open in GitHub",
@@ -84,7 +84,7 @@ class Github(commands.Cog):
         if isinstance(commits, str):
             return await ctx.respond(commits)
 
-        embed = embeds.construct_commits_embed(repo, commits)
+        embed = _embeds.construct_commits_embed(repo, commits)
 
         select_menu = CommitSelectMenu(
             commits,
@@ -137,7 +137,7 @@ class Github(commands.Cog):
                 ephemeral=True,
             )
 
-        embed = embeds.construct_loc_embed(repo, data)
+        embed = _embeds.construct_loc_embed(repo, data)
         await ctx.respond(embed=embed)
 
     @_git.command(
@@ -168,7 +168,7 @@ class Github(commands.Cog):
                 ephemeral=True,
             )
 
-        embed = embeds.construct_repo_files_embed(repo, files)
+        embed = _embeds.construct_repo_files_embed(repo, files)
 
         view = discord.ui.View()
         view.add_item(
@@ -204,7 +204,7 @@ class Github(commands.Cog):
                 ephemeral=True,
             )
 
-        embed = embeds.construct_issue_embed(issue)
+        embed = _embeds.construct_issue_embed(issue)
 
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label="Open in GitHub", url=issue["html_url"]))
@@ -233,7 +233,7 @@ class Github(commands.Cog):
                 f"Failed to fetch search results for **{query}**.", ephemeral=True
             )
 
-        embed = embeds.construct_repo_embed(results["items"][0])
+        embed = _embeds.construct_repo_embed(results["items"][0])
 
         view = discord.ui.View()
         view.add_item(
@@ -268,7 +268,7 @@ class Github(commands.Cog):
                 f"Failed to fetch profile for **{username}**.", ephemeral=True
             )
 
-        embed = embeds.construct_profile_embed(profile, repos)
+        embed = _embeds.construct_profile_embed(profile, repos)
 
         view = discord.ui.View()
         view.add_item(
@@ -305,7 +305,7 @@ class Github(commands.Cog):
                 f"Failed to fetch repo details for {repo}.", ephemeral=True
             )
 
-        embed = embeds.construct_repo_embed(repo)
+        embed = _embeds.construct_repo_embed(repo)
 
         view = discord.ui.View()
         view.add_item(
