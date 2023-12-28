@@ -6,7 +6,7 @@ import platform
 import datetime
 
 from discord.ext import commands
-from utils import formatting, github_api
+from utils import _formatting, _github
 from dataclasses import dataclass
 
 
@@ -23,7 +23,7 @@ class BotInfo:
 class Info(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.github_api = github_api.GitHubAPI()
+        self.github_api = _github.GitHubAPI()
         self.start_time = datetime.datetime.now(datetime.timezone.utc)
 
     @discord.slash_command(
@@ -38,7 +38,7 @@ class Info(commands.Cog):
             datetime.datetime.now(datetime.timezone.utc) - self.start_time
         ).split(".")[0]
 
-        version = f"[`{commit['sha'][:7]}`]({commit['url']}) - {formatting.iso_to_discord_timestamp(commit['commit']['author']['date'])}"
+        version = f"[`{commit['sha'][:7]}`]({commit['url']}) - {_formatting.iso_to_discord_timestamp(commit['commit']['author']['date'])}"
 
         process = psutil.Process()
         memory_usage = f"{process.memory_info().rss / 1024**2:.2f} / {psutil.virtual_memory().total / 1024**2:.2f} MB"
