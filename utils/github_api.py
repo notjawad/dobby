@@ -39,11 +39,11 @@ class GitHubAPI:
             )
             return None
 
-    async def fetch_latest_commit(self, repo: str) -> dict:
+    async def fetch_latest_commits(self, repo: str) -> dict:
         url = f"{self.BASE_URL}/repos/{repo}/commits"
         async with self.session.get(url) as response:
             if response.status == 200:
-                return (await response.json())[0]
+                return (await response.json())[:10]
             self.logger.error(
                 f"Failed to fetch latest commit for {repo}: {response.status}"
             )
