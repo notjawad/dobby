@@ -72,6 +72,7 @@ COLORS = {
     "peach": 0xFADFAD,
     "cyan": 0x77D8D8,
     "magenta": 0xF49AC2,
+    "white": 0xFFFFFF,
 }
 
 
