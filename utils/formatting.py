@@ -42,7 +42,6 @@ def _get_assignees(pr: dict) -> str:
 
 
 def _get_comments(comments: list) -> str:
-    print(comments)
     formatted_comments = "\n".join(
         f"[`{c['user']['login']}`]({c['user']['html_url']}) - {c['body'][:200]}{'...' if len(c['body']) > 200 else ''}"
         for c in comments
@@ -50,7 +49,7 @@ def _get_comments(comments: list) -> str:
     return formatted_comments
 
 
-def build_pr_embed(pr, show_comments, comments):
+def build_pr_embed(pr, show_comments, comments=None):
     embed = discord.Embed(
         title=f"{emojis['pr']} {pr['title']}", url=pr["html_url"], color=_get_color(pr)
     )
@@ -71,11 +70,15 @@ def build_pr_embed(pr, show_comments, comments):
 
     embed.add_field(name="Created", value=iso_to_discord_timestamp(pr["created_at"]))
 
-    for name, key in [("Merged", "merged_at"), ("Closed", "closed_at")]:
+    for name, key in [
+        ("Merged", "merged_at"),
+        ("Closed", "closed_at"),
+        ("Updated", "updated_at"),
+    ]:
         if date := pr.get(key):
             embed.add_field(name=name, value=iso_to_discord_timestamp(date))
 
     if show_comments:
-        embed.add_field(name="Comments", value=_get_comments(comments))
+        embed.add_field(name="Comments", value=_get_comments(comments), inline=False)
 
     return embed

@@ -32,13 +32,12 @@ class Github(commands.Cog):
         ),
         pr_number: discord.Option(int, "The pull request number", required=True),
         show_comments: discord.Option(bool, "Whether to show comments", default=False),
-    ):
+    ) -> None:
         if "/" not in repo:
             return await ctx.respond(
                 "Invalid repository name. Please use the format **owner/repo**.",
                 ephemeral=True,
             )
-
         pr = await self.github_api.fetch_pr(repo, pr_number)
 
         if not pr:
@@ -46,11 +45,20 @@ class Github(commands.Cog):
                 f"Failed to fetch PR details for {repo}#{pr_number}.", ephemeral=True
             )
 
-        if show_comments:
-            comments = await self.github_api.fetch_pr_comments(repo, pr_number)
+        comments = await self.github_api.fetch_pr_comments(repo, pr_number)
 
-        embed = build_pr_embed(pr, show_comments, comments)
-        await ctx.respond(embed=embed)
+        embed = build_pr_embed(pr, show_comments, comments[:3])
+
+        open_in_github = discord.ui.Button(
+            label="Open in GitHub",
+            url=pr["html_url"],
+            style=discord.ButtonStyle.link,
+        )
+
+        view = discord.ui.View()
+        view.add_item(open_in_github)
+
+        await ctx.respond(embed=embed, view=view)
 
 
 def setup(bot_: discord.Bot):
