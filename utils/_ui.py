@@ -38,7 +38,9 @@ class CommitSelectMenu(discord.ui.Select):
                 selected_commit["url"],
             )
 
-            embed = discord.Embed(title=commit_message, color=constants.COLORS["green"])
+            embed = discord.Embed(
+                title=f"{commit_message[:253]}...", color=constants.COLORS["green"]
+            )
             embed.add_field(
                 name="Commit message:", value=commit_data["message"], inline=False
             )
