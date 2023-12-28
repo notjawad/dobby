@@ -4,7 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 def setup_logging():
     # Configure the root logger
-    logger = logging.getLogger("lambda")
+    logger = logging.getLogger("dobby")
     logger.setLevel(logging.DEBUG)
 
     # Create handlers
@@ -12,7 +12,7 @@ def setup_logging():
     console_handler.setLevel(logging.INFO)
 
     file_handler = RotatingFileHandler(
-        filename="lambda_bot.log", maxBytes=5 * 1024 * 1024, backupCount=5
+        filename="dobby_bot.log", maxBytes=5 * 1024 * 1024, backupCount=5
     )
     file_handler.setLevel(logging.DEBUG)
 
