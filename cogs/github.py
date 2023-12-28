@@ -1,9 +1,8 @@
 import discord
 import logging
-import constants
 
 from discord.ext import commands
-from utils.formatting import build_pr_embed
+from utils import embeds
 from utils.github_api import GitHubAPI
 from utils.ui import CommitSelectMenu
 
@@ -36,7 +35,7 @@ class Github(commands.Cog):
     ) -> None:
         if "/" not in repo:
             return await ctx.respond(
-                "Invalid repository name. Please use the format **owner/repo**.",
+                "Invalid repository name. Please use the format owner/repo.",
                 ephemeral=True,
             )
         pr = await self.github_api.fetch_pr(repo, pr_number)
@@ -48,7 +47,7 @@ class Github(commands.Cog):
 
         comments = await self.github_api.fetch_pr_comments(repo, pr_number)
 
-        embed = build_pr_embed(pr, show_comments, comments[:3])
+        embed = embeds.construct_pr_embed(pr, show_comments, comments[:3])
 
         open_in_github = discord.ui.Button(
             label="Open in GitHub",
@@ -76,7 +75,8 @@ class Github(commands.Cog):
     ) -> None:
         if repo.count("/") != 1:
             return await ctx.respond(
-                "Invalid repository format. The format should be **owner/repo**."
+                "Invalid repository format. The format should be owner/repo.",
+                ephemeral=True,
             )
 
         commits = await self.github_api.fetch_latest_commits(repo)
@@ -84,24 +84,7 @@ class Github(commands.Cog):
         if isinstance(commits, str):
             return await ctx.respond(commits)
 
-        description = []
-
-        for commit in commits:
-            sha = commit["sha"][:7]
-            message = commit["commit"]["message"].split("\n")[0]
-
-            if len(message) > 50:
-                message = f"{message[:50]}..."
-            description.append(
-                f"{constants.EMOJIS['check']} [`{sha}`]({commit['html_url']}) {message.replace('`', '')}"
-            )
-
-        embed = discord.Embed(
-            title=f"{constants.EMOJIS['github']} Latest commits in `{repo}`",
-            description="\n".join(description),
-            color=constants.COLORS["green"],
-            url=f"https://github.com/{repo}",
-        )
+        embed = embeds.construct_commits_embed(repo, commits)
 
         select_menu = CommitSelectMenu(
             commits,
@@ -141,39 +124,198 @@ class Github(commands.Cog):
     ) -> None:
         if repo.count("/") != 1:
             return await ctx.respond(
-                "Invalid repository format. The format should be **owner/repo**."
+                "Invalid repository format. The format should be owner/repo.",
             )
 
         await ctx.defer()
 
         data = await self.github_api.fetch_lines_of_code(repo)
 
-        embed = discord.Embed(
-            title=f"Lines of Code in `{repo}`",
-            color=constants.COLORS["green"],
-            url=f"https://github.com/{repo}",
-        )
-
-        total_lines = sum(item["lines"] for item in data)
-        total_files = sum(item["files"] for item in data)
-        code_breakdown = "\n".join(
-            f"{language}: {linesOfCode}"
-            for language, linesOfCode in (
-                (item["language"], item["linesOfCode"]) for item in data
+        if not data:
+            return await ctx.respond(
+                f"Failed to fetch lines of code for **{repo}**. Does the repository exist?",
+                ephemeral=True,
             )
-            if language != "Total"
-        )
 
-        embed.description = (
-            f"A total of **{total_lines}** lines of code in **{total_files}** files."
-        )
-        embed.add_field(
-            name="Language Breakdown:",
-            value=f"```{code_breakdown}```",
-            inline=False,
-        )
-
+        embed = embeds.construct_loc_embed(repo, data)
         await ctx.respond(embed=embed)
+
+    @_git.command(
+        name="files",
+        description="Get the files of a repository.",
+    )
+    async def _files(
+        self,
+        ctx: discord.ApplicationContext,
+        repo: discord.Option(
+            str,
+            "The repository to get the files for. (e.g. uni-bot/uni)",
+            required=True,
+        ),
+    ) -> None:
+        if repo.count("/") != 1:
+            return await ctx.respond(
+                "Invalid repository format. The format should be owner/repo.",
+                ephemeral=True,
+            )
+
+        await ctx.defer()
+
+        files = await self.github_api.fetch_repo_files(repo)
+        if not files:
+            return await ctx.respond(
+                f"Failed to fetch files for **{repo}**. Does the repository exist?",
+                ephemeral=True,
+            )
+
+        embed = embeds.construct_repo_files_embed(repo, files)
+
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(label="View on GitHub", url=f"https://github.com/{repo}")
+        )
+
+        await ctx.respond(embed=embed, view=view)
+
+    @_git.command(
+        name="issue",
+        description="Get information about an issue.",
+    )
+    async def _issue(
+        self,
+        ctx: discord.ApplicationContext,
+        repo: discord.Option(
+            str,
+            "The repository to get the issue from (e.g. owner/repo)",
+            required=True,
+        ),
+        issue_number: discord.Option(int, "The issue number", required=True),
+    ) -> None:
+        if "/" not in repo:
+            return await ctx.respond(
+                "Invalid repository name. Please use the format owner/repo.",
+                ephemeral=True,
+            )
+        issue = await self.github_api.fetch_issue_details(repo, issue_number)
+
+        if not issue:
+            return await ctx.respond(
+                f"Failed to fetch issue details for {repo}#{issue_number}.",
+                ephemeral=True,
+            )
+
+        embed = embeds.construct_issue_embed(issue)
+
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Open in GitHub", url=issue["html_url"]))
+
+        await ctx.respond(embed=embed, view=view)
+
+    @_git.command(
+        name="search",
+        description="Search for a repository.",
+    )
+    async def _search(
+        self,
+        ctx: discord.ApplicationContext,
+        query: discord.Option(
+            str,
+            "The query to search for.",
+            required=True,
+        ),
+    ) -> None:
+        await ctx.defer()
+
+        results = await self.github_api.search_repos(query)
+
+        if not results:
+            return await ctx.respond(
+                f"Failed to fetch search results for **{query}**.", ephemeral=True
+            )
+
+        embed = embeds.construct_repo_embed(results["items"][0])
+
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(
+                label="View on GitHub",
+                url=results["items"][0]["html_url"],
+            )
+        )
+
+        await ctx.respond(embed=embed, view=view)
+
+    @_git.command(
+        name="profile",
+        description="Get information about a GitHub profile.",
+    )
+    async def _profile(
+        self,
+        ctx: discord.ApplicationContext,
+        username: discord.Option(
+            str,
+            "The username to get the profile for.",
+            required=True,
+        ),
+    ) -> None:
+        await ctx.defer()
+
+        profile = await self.github_api.fetch_profile(username)
+        repos = await self.github_api.get_user_repos(username)
+
+        if not profile:
+            return await ctx.respond(
+                f"Failed to fetch profile for **{username}**.", ephemeral=True
+            )
+
+        embed = embeds.construct_profile_embed(profile, repos)
+
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(
+                label="View on GitHub",
+                url=profile["html_url"],
+            )
+        )
+
+        await ctx.respond(embed=embed, view=view)
+
+    @_git.command(
+        name="repo",
+        description="Get information about a repository.",
+    )
+    async def _repo(
+        self,
+        ctx: discord.ApplicationContext,
+        repo: discord.Option(
+            str,
+            "The repository to get the information for (e.g. owner/repo)",
+            required=True,
+        ),
+    ) -> None:
+        if "/" not in repo:
+            return await ctx.respond(
+                "Invalid repository name. Please use the format owner/repo.",
+                ephemeral=True,
+            )
+        repo = await self.github_api.fetch_repo(repo)
+
+        if not repo:
+            return await ctx.respond(
+                f"Failed to fetch repo details for {repo}.", ephemeral=True
+            )
+
+        embed = embeds.construct_repo_embed(repo)
+
+        view = discord.ui.View()
+        view.add_item(
+            discord.ui.Button(
+                label="View on GitHub",
+                url=repo["html_url"],
+            )
+        )
+
+        await ctx.respond(embed=embed, view=view)
 
 
 def setup(bot_: discord.Bot):
