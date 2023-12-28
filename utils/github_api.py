@@ -49,5 +49,15 @@ class GitHubAPI:
             )
             return None
 
+    async def fetch_lines_of_code(self, repo: str) -> dict:
+        url = f"https://api.codetabs.com/v1/loc?github={repo}"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(
+                f"Failed to fetch lines of code for {repo}: {response.status}"
+            )
+            return None
+
     async def close(self):
         await self.session.close()

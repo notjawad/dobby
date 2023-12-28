@@ -1,8 +1,8 @@
 import discord
 import logging
+import constants
 
 from discord.ext import commands
-from constants import *
 from utils.formatting import build_pr_embed
 from utils.github_api import GitHubAPI
 from utils.ui import CommitSelectMenu
@@ -73,7 +73,7 @@ class Github(commands.Cog):
             "The repository to get the latest commits for. (e.g. uni-bot/uni)",
             required=True,
         ),
-    ):
+    ) -> None:
         if repo.count("/") != 1:
             return await ctx.respond(
                 "Invalid repository format. The format should be **owner/repo**."
@@ -93,13 +93,13 @@ class Github(commands.Cog):
             if len(message) > 50:
                 message = f"{message[:50]}..."
             description.append(
-                f"{EMOJIS['check']} [`{sha}`]({commit['html_url']}) {message.replace('`', '')}"
+                f"{constants.EMOJIS['check']} [`{sha}`]({commit['html_url']}) {message.replace('`', '')}"
             )
 
         embed = discord.Embed(
-            title=f"{EMOJIS['github']} Latest commits in `{repo}`",
+            title=f"{constants.EMOJIS['github']} Latest commits in `{repo}`",
             description="\n".join(description),
-            color=COLORS["green"],
+            color=constants.COLORS["green"],
             url=f"https://github.com/{repo}",
         )
 
@@ -125,6 +125,55 @@ class Github(commands.Cog):
             embed=embed,
             view=view,
         )
+
+    @_git.command(
+        name="loc",
+        description="Line of code breakdown for a repository.",
+    )
+    async def _loc(
+        self,
+        ctx: discord.ApplicationContext,
+        repo: discord.Option(
+            str,
+            "The repository to get the line of code breakdown for. (e.g. uni-bot/uni)",
+            required=True,
+        ),
+    ) -> None:
+        if repo.count("/") != 1:
+            return await ctx.respond(
+                "Invalid repository format. The format should be **owner/repo**."
+            )
+
+        await ctx.defer()
+
+        data = await self.github_api.fetch_lines_of_code(repo)
+
+        embed = discord.Embed(
+            title=f"Lines of Code in `{repo}`",
+            color=constants.COLORS["green"],
+            url=f"https://github.com/{repo}",
+        )
+
+        total_lines = sum(item["lines"] for item in data)
+        total_files = sum(item["files"] for item in data)
+        code_breakdown = "\n".join(
+            f"{language}: {linesOfCode}"
+            for language, linesOfCode in (
+                (item["language"], item["linesOfCode"]) for item in data
+            )
+            if language != "Total"
+        )
+
+        embed.description = (
+            f"A total of **{total_lines}** lines of code in **{total_files}** files."
+        )
+        embed.add_field(
+            name="Language Breakdown:",
+            value=f"```{code_breakdown}```",
+            inline=False,
+        )
+
+        await ctx.respond(embed=embed)
 
 
 def setup(bot_: discord.Bot):
