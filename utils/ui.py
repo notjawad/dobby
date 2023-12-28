@@ -9,8 +9,8 @@ from utils.formatting import iso_to_discord_timestamp
 class CommitSelectMenu(discord.ui.Select):
     def __init__(self, commits, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.commits = commits
-        self.last_message = None
+        self.commits = commits  # Store the commits passed to the constructor
+        self.last_message = None  # Store the last message sent by this menu
 
     async def get_commit(self, url: str):
         async with (aiohttp.ClientSession() as session, session.get(url) as resp):
@@ -18,11 +18,11 @@ class CommitSelectMenu(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         # Delete the previous message if it exists
-
         if self.last_message:
             with contextlib.suppress(discord.NotFound):
                 await self.last_message.delete_original_response()
 
+        # Find the selected commit from the list of commits
         if selected_commit := next(
             (
                 commit
@@ -66,8 +66,13 @@ class CommitSelectMenu(discord.ui.Select):
                 url=selected_commit["author"]["html_url"],
             )
 
-            view = discord.ui.View().add_item(
-                discord.ui.Button(label="View diff", url=selected_commit["html_url"])
+            view = discord.ui.View()
+            view.add_item(
+                discord.ui.Button(
+                    label="View on GitHub",
+                    url=selected_commit["html_url"],
+                    style=discord.ButtonStyle.link,
+                )
             )
 
             self.last_message = await interaction.response.send_message(
