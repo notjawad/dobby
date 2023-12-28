@@ -1,7 +1,7 @@
 import discord
+import constants
 
 from datetime import datetime, timezone
-from constants import *
 
 
 def iso_to_discord_timestamp(iso_date: str) -> str:
@@ -19,15 +19,17 @@ def get_file_emoji(file_name: str) -> str:
     return next(
         (
             emoji
-            for extension, emoji in file_emoji_dict.items()
+            for extension, emoji in constants.FILE_EMOJIS.items()
             if file_name.endswith(extension) or file_name == extension
         ),
-        file_emoji_dict["file"],
+        constants.FILE_EMOJIS["file"],
     )
 
 
 def _get_color(pr):
-    return colors["green"] if pr["state"] == "open" else colors["red"]
+    return (
+        constants.COLORS["green"] if pr["state"] == "open" else constants.COLORS["red"]
+    )
 
 
 def _get_description(pr: dict) -> str:
@@ -42,16 +44,17 @@ def _get_assignees(pr: dict) -> str:
 
 
 def _get_comments(comments: list) -> str:
-    formatted_comments = "\n".join(
+    return "\n".join(
         f"[`{c['user']['login']}`]({c['user']['html_url']}) - {c['body'][:200]}{'...' if len(c['body']) > 200 else ''}"
         for c in comments
     )
-    return formatted_comments
 
 
 def build_pr_embed(pr, show_comments, comments=None):
     embed = discord.Embed(
-        title=f"{emojis['pr']} {pr['title']}", url=pr["html_url"], color=_get_color(pr)
+        title=f"{constants.EMOJIS['pr']} {pr['title']}",
+        url=pr["html_url"],
+        color=_get_color(pr),
     )
 
     embed.set_author(
