@@ -59,5 +59,53 @@ class GitHubAPI:
             )
             return None
 
+    async def fetch_repo_files(self, repo: str) -> dict:
+        url = f"{self.BASE_URL}/repos/{repo}/contents"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(
+                f"Failed to fetch repo files for {repo}: {response.status}"
+            )
+            return None
+
+    async def search_repos(self, query: str) -> dict:
+        url = f"{self.BASE_URL}/search/repositories?q={query}"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(f"Failed to search for {query}: {response.status}")
+            return None
+
+    async def fetch_profile(self, username: str) -> dict:
+        url = f"{self.BASE_URL}/users/{username}"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(
+                f"Failed to fetch profile for {username}: {response.status}"
+            )
+            return None
+
+    async def get_user_repos(self, username: str) -> dict:
+        url = f"{self.BASE_URL}/users/{username}/repos"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(
+                f"Failed to fetch repos for {username}: {response.status}"
+            )
+            return None
+
+    async def fetch_repo(self, repo: str) -> dict:
+        url = f"{self.BASE_URL}/repos/{repo}"
+        async with self.session.get(url) as response:
+            if response.status == 200:
+                return await response.json()
+            self.logger.error(
+                f"Failed to fetch repo details for {repo}: {response.status}"
+            )
+            return None
+
     async def close(self):
         await self.session.close()
