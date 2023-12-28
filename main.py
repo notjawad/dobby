@@ -2,10 +2,11 @@ import discord
 import traceback
 import os
 import asyncio
+import constants
+
 
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from constants import bot_statuses
 from log_config import setup_logging
 
 
@@ -41,7 +42,7 @@ class Bot(commands.AutoShardedBot):
     async def status_cycle(self):
         await self.wait_until_ready()
 
-        for status in bot_statuses:
+        for status in constants.BOT_STATUSES:
             await self.change_presence(activity=discord.Game(name=status))
             await asyncio.sleep(600)
 
