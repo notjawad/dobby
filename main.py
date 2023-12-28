@@ -17,7 +17,7 @@ setup_logging()
 class Bot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(
-            command_prefix=".l ",
+            command_prefix="dobby ",
             intents=discord.Intents.all(),
             activity=discord.Game(name=""),
         )
