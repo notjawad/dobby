@@ -3,7 +3,7 @@ import discord
 
 import constants
 import contextlib
-from utils.formatting import iso_to_discord_timestamp
+from utils._formatting import iso_to_discord_timestamp
 
 
 class CommitSelectMenu(discord.ui.Select):

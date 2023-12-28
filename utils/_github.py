@@ -7,7 +7,7 @@ class GitHubAPI:
 
     def __init__(self):
         self.session = aiohttp.ClientSession()
-        self.logger = logging.getLogger("lambda")
+        self.logger = logging.getLogger("dobby")
 
     async def fetch_pr(self, repo: str, pr_number: int) -> dict:
         url = f"{self.BASE_URL}/repos/{repo}/pulls/{pr_number}"
