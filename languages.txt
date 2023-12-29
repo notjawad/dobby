@@ -615,8 +615,10 @@ v-fmota
 vala
 var
 vb-core
+swift
 verbosity
 vb
+ts
 assembly
 visual-basic-net-mono
 visual-basic-net-vbc
