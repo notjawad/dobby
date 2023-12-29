@@ -32,7 +32,7 @@ class Code(commands.Cog):
         name="eval",
         description="Evaluate code.",
     )
-    async def eval_(self, ctx: commands.Context, *, code: str) -> None:
+    async def eval_(self, ctx: commands.Context, *, code: str):
         if not code.startswith("```"):
             return await ctx.reply(
                 "Invalid code block. Please use the format ```language\ncode```"

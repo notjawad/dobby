@@ -247,10 +247,9 @@ class Help(commands.Cog):
                 )
 
                 if command is None:
-                    await ctx.respond(
+                    return await ctx.respond(
                         f"Command **{command_name}** not found.", ephemeral=True
                     )
-                    return
 
             if command:
                 await self.show_specific_command_help(ctx, command)
