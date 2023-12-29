@@ -45,3 +45,16 @@ class StackOverflow:
                 return data["items"][0].get("body", "No body found.")
             else:
                 return "No question found with the provided ID."
+
+    async def get_user(self, inname: int) -> dict:
+        url = "https://api.stackexchange.com/2.3/users"
+        params = {
+            "inname": inname,
+            "order": "desc",
+            "sort": "reputation",
+            "site": "stackoverflow",
+            "filter": "!9_bDE(fI5",
+        }
+        async with self.session.get(url, params=params) as resp:
+            data = await resp.json()
+            return data["items"][0] if data["items"] else None
