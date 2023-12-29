@@ -31,7 +31,7 @@ class Github(commands.Cog):
             required=True,
         ),
         pr_number: discord.Option(int, "The pull request number", required=True),
-        show_comments: discord.Option(bool, "Whether to show comments", default=False),
+        show_comments: discord.Option(bool, "Whether to show comments", required=False),
     ) -> None:
         if "/" not in repo:
             return await ctx.respond(

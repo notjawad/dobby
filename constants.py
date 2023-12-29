@@ -1,6 +1,6 @@
 # Bot constants
 BOT_STATUSES = [
-    "Loop-de-loop",
+    "",
 ]
 BOT_REPO = "notjawad/dobby"
 BOT_DESCRIPTION = (
