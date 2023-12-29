@@ -122,7 +122,7 @@ class Info(commands.Cog):
         source = inspect.cleandoc(source)
         self.source = source
 
-        source = source[:400]
+        source = source[:800]
 
         # Get the beginning line number and the ending line number.
         begin = inspect.getsourcelines(command.callback)[1]
