@@ -3,15 +3,22 @@ import constants
 from datetime import datetime, timezone
 
 
-def iso_to_discord_timestamp(iso_date: str) -> str:
-    try:
-        date_obj = datetime.fromisoformat(iso_date.rstrip("Z")).replace(
-            tzinfo=timezone.utc
-        )
-        timestamp = int(date_obj.timestamp())
-        return f"<t:{timestamp}:R>"
-    except ValueError:
-        return "Invalid ISO date format."
+def iso_to_discord_timestamp(date_input) -> str:
+    # Determine if the input is an ISO string or a Unix timestamp
+    if isinstance(date_input, str):  # If it's a string, handle it as an ISO date
+        try:
+            date_obj = datetime.fromisoformat(date_input.rstrip("Z")).replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError:
+            return "Invalid ISO date format."
+    elif isinstance(date_input, int):  # If it's an int, handle it as a Unix timestamp
+        date_obj = datetime.fromtimestamp(date_input, tz=timezone.utc)
+    else:
+        return "Invalid date input."
+
+    timestamp = int(date_obj.timestamp())
+    return f"<t:{timestamp}:R>"
 
 
 def get_file_emoji(file_name: str) -> str:

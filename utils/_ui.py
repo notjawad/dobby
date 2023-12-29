@@ -1,16 +1,19 @@
 import aiohttp
 import discord
+import re
 
+from html import unescape
 import constants
 import contextlib
 from utils._formatting import iso_to_discord_timestamp
+from utils._stackoverflow import StackOverflow
 
 
 class CommitSelectMenu(discord.ui.Select):
     def __init__(self, commits, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.commits = commits  # Store the commits passed to the constructor
-        self.last_message = None  # Store the last message sent by this menu
+        self.commits = commits
+        self.last_message = None
 
     async def get_commit(self, url: str):
         async with (aiohttp.ClientSession() as session, session.get(url) as resp):
@@ -79,4 +82,116 @@ class CommitSelectMenu(discord.ui.Select):
 
             self.last_message = await interaction.response.send_message(
                 embed=embed, view=view, ephemeral=True
+            )
+
+
+class StackOverflowSelectMenu(discord.ui.Select):
+    def __init__(self, results, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.results = results
+        self.last_message = None
+        self.sf_client = StackOverflow()
+
+    def parse_body(self, body: str) -> str:
+        body = unescape(body)
+
+        body = body.replace(
+            '<pre class="lang-py prettyprint-override">', "```python\n"
+        ).replace("</pre>", "```")
+
+        body = re.sub(r"<code>(.*?)</code>", r"`\1`", body)
+        body = re.sub(r'<a href="(.*?)"[^>]*>(.*?)</a>', r"[`\2`](\1)", body)
+        body = re.sub(r"<.*?>", "", body)
+        return body
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.last_message:
+            with contextlib.suppress(discord.NotFound):
+                await self.last_message.delete_original_response()
+
+        if selected_result := next(
+            (
+                result
+                for result in self.results
+                if str(result["question_id"]) == self.values[0]
+            ),
+            None,
+        ):
+            embed = discord.Embed(
+                title=selected_result["title"],
+                url=selected_result["link"],
+                color=constants.COLORS["orange"],
+            )
+
+            question_body = await self.sf_client.get_question_body(
+                selected_result["question_id"]
+            )
+
+            if question_body:
+                embed.description = self.parse_body(question_body[:600])
+                if len(question_body) > 600:
+                    embed.description += "..."
+
+            embed.set_author(
+                name=selected_result["owner"]["display_name"]
+                + f"(• {selected_result['owner']['reputation']})",
+                icon_url=selected_result["owner"]["profile_image"],
+                url=selected_result["owner"]["link"],
+            )
+
+            embed.add_field(
+                name="Answers",
+                value=str(selected_result["answer_count"]),
+                inline=True,
+            )
+            embed.add_field(
+                name="Score", value=str(selected_result["score"]), inline=True
+            )
+
+            embed.add_field(
+                name="Tags",
+                value=", ".join(selected_result["tags"]),
+                inline=False,
+            )
+
+            embed.add_field(
+                name="Views",
+                value=str(selected_result["view_count"]),
+                inline=True,
+            )
+
+            embed.add_field(
+                name="Last Activity",
+                value=iso_to_discord_timestamp(selected_result["last_activity_date"]),
+                inline=True,
+            )
+
+            embed.add_field(
+                name="Creation Date",
+                value=iso_to_discord_timestamp(selected_result["creation_date"]),
+                inline=True,
+            )
+
+            open_in_stackoverflow = discord.ui.Button(
+                label="Open in StackOverflow",
+                url=selected_result["link"],
+                style=discord.ButtonStyle.link,
+            )
+            view = discord.ui.View()
+            view.add_item(open_in_stackoverflow)
+
+            # Send the embed to the channel
+            self.last_message = await interaction.response.send_message(
+                embed=embed, view=view, ephemeral=True
+            )
+
+    # Add options to the select menu
+    def add_options_from_results(self):
+        for result in self.results:
+            self.add_option(
+                label=unescape(
+                    result["title"][:100]
+                ),  # Truncate if too long for select option
+                description=f"Score: {result['score']} | Answers: {result['answer_count']}",
+                value=str(result["question_id"]),
             )
