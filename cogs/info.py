@@ -72,7 +72,7 @@ class Info(commands.Cog):
             datetime.datetime.now(datetime.timezone.utc) - self.start_time
         ).split(".")[0]
 
-        version = f"[`{commit['sha'][:7]}`]({commit['url']}) - {_formatting.iso_to_discord_timestamp(commit['commit']['author']['date'])}"
+        version = f"[`{commit['sha'][:7]}`]({commit['html_url']}) - {_formatting.iso_to_discord_timestamp(commit['commit']['author']['date'])}"
 
         process = psutil.Process()
         memory_usage = f"{process.memory_info().rss / 1024**2:.2f} / {psutil.virtual_memory().total / 1024**2:.2f} MB"
