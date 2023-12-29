@@ -237,7 +237,7 @@ def create_eval_embed(
     emoji = constants.LANG_EMOJIS.get(lang, "")
     embed = discord.Embed(
         title=f"`Result - {message.id}`",
-        description=f"Your code exited with code **{metrics['exit_code']}** {emoji}",
+        description=f"{emoji} Exited with code **{metrics['exit_code']}**",
         color=constants.COLORS["green"],
         url=message.jump_url,
     )
