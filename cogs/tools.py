@@ -1,11 +1,10 @@
 import discord
-import constants
-
 from discord.ext import commands
+
+import constants
 from utils import _stackoverflow
-from utils._ui import StackOverflowSelectMenu
 from utils._formatting import iso_to_discord_timestamp
-from typing import Optional
+from utils._ui import StackOverflowSelectMenu
 
 
 class Tools(commands.Cog):
