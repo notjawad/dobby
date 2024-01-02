@@ -1,13 +1,13 @@
 import discord
-import constants
 
+import constants
 from utils._formatting import (
-    iso_to_discord_timestamp,
-    get_file_emoji,
     _get_assignees,
+    _get_color,
     _get_comments,
     _get_description,
-    _get_color,
+    get_file_emoji,
+    iso_to_discord_timestamp,
 )
 
 
@@ -198,7 +198,7 @@ def construct_profile_embed(profile: dict, repos: list) -> discord.Embed:
     bio = profile["bio"] or "No bio."
 
     if repos:
-        bio += f"\n\n**Repositories**:"
+        bio += "\n\n**Repositories**:"
         for repo in repos[:5]:
             bio += f"\n{constants.EMOJIS['repo']} [`{repo['full_name']}`]({repo['html_url']})"
 
